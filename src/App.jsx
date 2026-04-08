@@ -98,7 +98,6 @@ const WallCalendar = () => {
 
   const isRangeSelected = selectionStart && selectionEnd;
 
-  // FIX: Removed notesData from dependency array to prevent draft overwrite bugs mid-typing!
   useEffect(() => {
     const key = getActiveNoteKey();
     setCurrentNoteDraft(notesData[key] || '');
@@ -147,7 +146,6 @@ const WallCalendar = () => {
     localStorage.setItem('calendar_tasks', JSON.stringify(updatedTasks));
   };
 
-  // UX ADDITION: Go to Today function
   const goToToday = () => {
     const today = new Date();
     setIsAnimating(true);
@@ -226,7 +224,8 @@ const WallCalendar = () => {
       const hasPendingTasks = dayTasks.some(t => !t.completed);
       const isToday = dateKey === todayKey;
 
-      let baseClasses = "relative w-10 h-10 mx-auto flex items-center justify-center rounded-full text-sm font-semibold cursor-pointer transition-all duration-200";
+      // Responsive circle sizes: w-8 h-8 on mobile, w-10 h-10 on tablet/desktop
+      let baseClasses = "relative w-8 h-8 sm:w-10 sm:h-10 mx-auto flex items-center justify-center rounded-full text-xs sm:text-sm font-semibold cursor-pointer transition-all duration-200";
       
       if (isStart || isEnd) baseClasses += ` ${theme.primary} text-white shadow-lg transform scale-110 z-10`;
       else if (selected) baseClasses += ` ${theme.light} ${theme.text} rounded-none w-full`;
@@ -237,7 +236,7 @@ const WallCalendar = () => {
         <div key={`day-${day}`} className="py-1 relative group">
           <div onClick={() => handleDayClick(day)} className={baseClasses}>
             {day}
-            <div className="absolute bottom-1 flex gap-1">
+            <div className="absolute bottom-0 sm:bottom-1 flex gap-1">
                {isHoliday && !isStart && !isEnd && <span className={`w-1 h-1 rounded-full ${theme.primary}`}></span>}
                {hasPendingTasks && !isStart && !isEnd && <span className="w-1 h-1 rounded-full bg-orange-500"></span>}
             </div>
@@ -255,35 +254,39 @@ const WallCalendar = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 flex items-center justify-center font-sans transition-colors duration-500">
+    <div className="min-h-screen bg-gray-50 py-6 sm:py-10 px-2 sm:px-4 md:px-6 flex items-center justify-center font-sans transition-colors duration-500">
       <div className="max-w-5xl w-full bg-white shadow-2xl rounded-2xl overflow-hidden flex flex-col relative">
-        <div className="absolute top-0 w-full h-8 flex justify-evenly px-4 z-20 opacity-80 pointer-events-none">
+        <div className="absolute top-0 w-full h-8 flex justify-evenly px-4 z-20 opacity-80 pointer-events-none overflow-hidden">
           {[...Array(20)].map((_, i) => <div key={i} className="w-2 h-10 bg-gradient-to-b from-gray-300 to-gray-500 rounded-full shadow-md transform -translate-y-4 border border-gray-400"></div>)}
         </div>
 
-        <div className="relative h-72 md:h-96 w-full bg-gray-900 overflow-hidden pt-6 group">
+        {/* Hero Section with responsive heights */}
+        <div className="relative h-56 sm:h-72 md:h-96 w-full bg-gray-900 overflow-hidden pt-6 group">
           <img src={theme.image} alt="Calendar Hero" className="w-full h-full object-cover opacity-80 transition-opacity duration-1000" key={theme.image} />
           
-          <div className="absolute top-8 right-8 flex gap-2 z-20 bg-black/40 backdrop-blur-md p-2 rounded-full border border-white/20 shadow-xl">
+          <div className="absolute top-8 right-4 sm:right-8 flex gap-2 z-20 bg-black/40 backdrop-blur-md p-2 rounded-full border border-white/20 shadow-xl">
             {THEMES.map((t, index) => (
-              <button key={t.id} onClick={() => { setActiveThemeIndex(index); localStorage.setItem('calendar_theme_index', index); }} className={`w-6 h-6 rounded-full border-2 transition-all duration-300 ${t.primary} ${index === activeThemeIndex ? 'scale-125 border-white shadow-md' : 'border-transparent hover:scale-110'}`} title={t.name}/>
+              <button key={t.id} onClick={() => { setActiveThemeIndex(index); localStorage.setItem('calendar_theme_index', index); }} className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 transition-all duration-300 ${t.primary} ${index === activeThemeIndex ? 'scale-125 border-white shadow-md' : 'border-transparent hover:scale-110'}`} title={t.name}/>
             ))}
           </div>
 
-          <div className="absolute bottom-0 w-full h-24 bg-white" style={{ clipPath: 'polygon(0 100%, 100% 100%, 100% 0, 0 100%)' }}></div>
+          <div className="absolute bottom-0 w-full h-16 sm:h-24 bg-white" style={{ clipPath: 'polygon(0 100%, 100% 100%, 100% 0, 0 100%)' }}></div>
           
-          <div className="absolute bottom-12 left-8 md:left-12 z-10 text-white drop-shadow-lg flex flex-col items-start">
-            <div className="relative inline-flex items-center group/year mb-[-5px]">
-              <select value={year} onChange={handleYearChange} className="text-3xl md:text-4xl font-light text-white tracking-widest opacity-90 bg-transparent appearance-none cursor-pointer focus:outline-none pr-6 z-20">
+          <div className="absolute bottom-8 sm:bottom-12 left-6 sm:left-8 md:left-12 z-10 text-white drop-shadow-lg flex flex-col items-start">
+            <div className="relative inline-flex items-center group/year mb-[-2px] sm:mb-[-5px]">
+              {/* Responsive text sizing */}
+              <select value={year} onChange={handleYearChange} className="text-2xl sm:text-3xl md:text-4xl font-light text-white tracking-widest opacity-90 bg-transparent appearance-none cursor-pointer focus:outline-none pr-6 z-20">
                 {yearOptions.map(y => <option key={y} value={y} className="text-gray-900 text-base font-sans">{y}</option>)}
               </select>
-              <svg className="w-5 h-5 text-white opacity-40 absolute right-0 group-hover/year:opacity-100 transition-opacity pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white opacity-40 absolute right-0 group-hover/year:opacity-100 transition-opacity pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
             </div>
-            <h1 className="text-5xl md:text-6xl font-black uppercase tracking-tight">{currentDate.toLocaleString('default', { month: 'long' })}</h1>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black uppercase tracking-tight">{currentDate.toLocaleString('default', { month: 'long' })}</h1>
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row px-6 md:px-12 py-8 gap-10">
+        {/* The Magic CSS Fix: flex-col-reverse forces the Grid to be ABOVE the Sidebar on Mobile! */}
+        <div className="flex flex-col-reverse md:flex-row px-4 sm:px-6 md:px-12 py-6 sm:py-8 gap-8 md:gap-10">
+          
           <div className="w-full md:w-1/3 flex flex-col gap-6">
             <div className={`flex flex-col ${selectionStart ? 'h-56' : 'flex-grow'}`}>
               <div className="flex justify-between items-end mb-3">
@@ -302,7 +305,7 @@ const WallCalendar = () => {
                  <h3 className={`text-sm font-bold uppercase tracking-wider mb-2 ${theme.text}`}>
                     {isRangeSelected ? `Tasks: ${selectionStart.getDate()} ${selectionStart.toLocaleString('default', { month: 'short' })} - ${selectionEnd.getDate()} ${selectionEnd.toLocaleString('default', { month: 'short' })}` : `Tasks for ${selectionStart.getDate()} ${selectionStart.toLocaleString('default', { month: 'short' })}`}
                  </h3>
-                 <div className="flex-grow overflow-y-auto mb-4 space-y-4 max-h-56 pr-2">
+                 <div className="flex-grow overflow-y-auto mb-4 space-y-4 max-h-48 sm:max-h-56 pr-2">
                     {activeDates.every(d => !(tasksData[d] && tasksData[d].length > 0)) && <p className="text-xs text-gray-400 italic text-center mt-4">No tasks set for this selection.</p>}
                     {activeDates.map(dateKey => {
                        const dayTasks = tasksData[dateKey] || [];
@@ -326,7 +329,7 @@ const WallCalendar = () => {
                     })}
                  </div>
                  <form onSubmit={handleAddTask} className="flex gap-2 mt-auto border-t pt-3 border-gray-200">
-                    <input type="text" value={newTaskText} onChange={(e) => setNewTaskText(e.target.value)} placeholder={isRangeSelected ? "Add task to ALL selected days..." : "Add a new task..."} className="flex-grow text-sm p-2 rounded-lg border border-gray-300 focus:outline-none focus:border-gray-500 shadow-sm" />
+                    <input type="text" value={newTaskText} onChange={(e) => setNewTaskText(e.target.value)} placeholder={isRangeSelected ? "Add task to ALL..." : "Add a new task..."} className="flex-grow text-xs sm:text-sm p-2 rounded-lg border border-gray-300 focus:outline-none focus:border-gray-500 shadow-sm" />
                     <button type="submit" disabled={!newTaskText.trim()} className={`p-2 px-3 rounded-lg text-white font-bold transition-opacity disabled:opacity-50 shadow-sm ${theme.primary}`}>+</button>
                  </form>
                </div>
@@ -334,13 +337,13 @@ const WallCalendar = () => {
           </div>
 
           <div className="w-full md:w-2/3">
-            <div className="flex justify-between items-center mb-6 relative">
+            <div className="flex justify-between items-center mb-4 sm:mb-6 relative">
               <button onClick={() => changeMonth(-1)} className="p-2 rounded-full hover:bg-gray-100 transition text-gray-500">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
+                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
               </button>
               
               <div className="flex flex-col items-center">
-                 <div className="text-sm font-medium text-gray-500 uppercase tracking-widest h-5 flex items-center mb-1">
+                 <div className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-widest h-5 flex items-center mb-1 text-center">
                    {selectionStart && !selectionEnd && `Selected: ${selectionStart.toLocaleDateString()}`}
                    {selectionStart && selectionEnd && `${selectionStart.toLocaleDateString()} — ${selectionEnd.toLocaleDateString()}`}
                    {!selectionStart && 'Select a date or range'}
@@ -349,26 +352,26 @@ const WallCalendar = () => {
               </div>
 
               <button onClick={() => changeMonth(1)} className="p-2 rounded-full hover:bg-gray-100 transition text-gray-500">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
+                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
               </button>
             </div>
 
             <div className={`transition-opacity duration-300 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
-              <div className="grid grid-cols-7 gap-y-4 mb-2">
+              <div className="grid grid-cols-7 gap-y-2 sm:gap-y-4 mb-2">
                 {['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].map((d, i) => (
-                  <div key={d} className={`text-center text-xs font-bold tracking-wider ${i > 4 ? theme.text : 'text-gray-400'}`}>
+                  <div key={d} className={`text-center text-[10px] sm:text-xs font-bold tracking-wider ${i > 4 ? theme.text : 'text-gray-400'}`}>
                     {d}
                   </div>
                 ))}
               </div>
-              <div className="grid grid-cols-7 gap-y-2 gap-x-0">
+              <div className="grid grid-cols-7 gap-y-1 sm:gap-y-2 gap-x-0">
                 {renderDays()}
               </div>
             </div>
 
             {selectionStart && (
-               <div className="mt-6 text-center animate-fade-in flex justify-center">
-                  <button onClick={() => { setSelectionStart(null); setSelectionEnd(null); }} className={`text-sm font-semibold underline-offset-4 hover:underline ${theme.text} px-4 py-2 rounded-lg hover:bg-gray-50`}>
+               <div className="mt-4 sm:mt-6 text-center animate-fade-in flex justify-center">
+                  <button onClick={() => { setSelectionStart(null); setSelectionEnd(null); }} className={`text-xs sm:text-sm font-semibold underline-offset-4 hover:underline ${theme.text} px-3 py-2 sm:px-4 rounded-lg hover:bg-gray-50`}>
                     Clear Selection
                   </button>
                </div>
